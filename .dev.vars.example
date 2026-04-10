@@ -1,0 +1,16 @@
+# Supabase (required)
+# Either SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL can be used.
+SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+
+# Either SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY can be used.
+# Service role is recommended for server-side inserts.
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_ANON_KEY=your-anon-key
+# Additional fallback key names accepted by backend:
+SUPABASE_KEY=your-key
+SUPABASE_TOKEN=your-key
+
+# Optional confirmation email via Resend
+RESEND_API_KEY=your-resend-api-key
+FROM_EMAIL=waitlist@flatfinder.io

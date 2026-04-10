@@ -27,6 +27,7 @@
 		"eslint-plugin-react-hooks": "7.0.1",
 		"eslint-plugin-react-refresh": "0.4.24",
 		"globals": "16.5.0",
+		"playwright": "^1.59.1",
 		"typescript": "5.8.3",
 		"typescript-eslint": "8.48.0",
 		"vite": "^6.0.0",
@@ -34,11 +35,12 @@
 	},
 	"private": true,
 	"scripts": {
-		"build": "tsc -b && vite build",
+		"sync:landing": "node scripts/sync-landing.mjs",
+		"build": "npm run sync:landing && tsc -b && vite build",
 		"cf-typegen": "wrangler types",
-		"check": "tsc && vite build && wrangler deploy --dry-run",
+		"check": "npm run sync:landing && tsc && vite build && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
-		"dev": "vite",
+		"dev": "npm run sync:landing && vite",
 		"lint": "eslint .",
 		"preview": "npm run build && vite preview"
 	},
