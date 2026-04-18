@@ -65,6 +65,44 @@ const insertIntoSupabaseTable = async (
 	return { response, errorPayload };
 };
 
+const getMissingColumnFromError = (payload: SupabaseErrorPayload | null) => {
+	const message = payload?.message ?? "";
+	const match = message.match(/Could not find the '([^']+)' column/i);
+	return match?.[1] ?? null;
+};
+
+const insertIntoWaitlistWithSchemaFallback = async (
+	supabaseUrl: string,
+	supabaseKey: string,
+	payload: Record<string, unknown>,
+) => {
+	const mutablePayload: Record<string, unknown> = { ...payload };
+	let lastResult = await insertIntoSupabaseTable(
+		supabaseUrl,
+		supabaseKey,
+		"waitlist",
+		mutablePayload,
+	);
+
+	// Backward compatibility: if the project has an older waitlist schema,
+	// remove unknown columns and retry until it can insert or a non-schema error occurs.
+	while (!lastResult.response.ok) {
+		const missingColumn = getMissingColumnFromError(lastResult.errorPayload);
+		if (!missingColumn || !(missingColumn in mutablePayload)) {
+			return lastResult;
+		}
+		delete mutablePayload[missingColumn];
+		lastResult = await insertIntoSupabaseTable(
+			supabaseUrl,
+			supabaseKey,
+			"waitlist",
+			mutablePayload,
+		);
+	}
+
+	return lastResult;
+};
+
 const checkEmailExistsInTable = async (
 	supabaseUrl: string,
 	supabaseKey: string,
@@ -91,7 +129,18 @@ const checkEmailExistsInTable = async (
 };
 
 const isMissingTableError = (status: number, payload: SupabaseErrorPayload | null) => {
-	return status === 404 || (payload?.code ? TABLE_NOT_FOUND_CODES.has(payload.code) : false);
+	if (status === 404) {
+		return true;
+	}
+	if (payload?.code && TABLE_NOT_FOUND_CODES.has(payload.code)) {
+		return true;
+	}
+	// Newer PostgREST sometimes returns this message without a known code in our set.
+	const msg = payload?.message ?? "";
+	if (/Could not find the table/i.test(msg) && /schema cache/i.test(msg)) {
+		return true;
+	}
+	return false;
 };
 
 const resolveSupabaseConfig = (env: Bindings) => {
@@ -198,10 +247,9 @@ app.post("/api/waitlist", async (c) => {
 	}
 
 	// Primary write path: `waitlist` table (new schema).
-	const waitlistInsert = await insertIntoSupabaseTable(
+	const waitlistInsert = await insertIntoWaitlistWithSchemaFallback(
 		supabaseUrl,
 		supabaseKey,
-		"waitlist",
 		waitlistPayload,
 	);
 
@@ -230,6 +278,15 @@ app.post("/api/waitlist", async (c) => {
 		if (!insertSucceeded) {
 			if (betaInsert.errorPayload?.code === "23505") {
 				return c.json({ error: "You're already on the list!" }, 409);
+			}
+			if (isMissingTableError(betaInsert.response.status, betaInsert.errorPayload)) {
+				return c.json(
+					{
+						error:
+							"Waitlist table is not set up yet. In Supabase: SQL Editor → paste and run the SQL from `supabase_migration.sql` in your project repo (creates `public.waitlist`). Then try again.",
+					},
+					503,
+				);
 			}
 			const errorDetail = parseSupabaseError(betaInsert.errorPayload);
 			console.error("beta_signups insert failed", betaInsert.errorPayload);

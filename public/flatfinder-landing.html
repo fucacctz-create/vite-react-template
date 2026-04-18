@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlatFinder™: Housing Revolutionised</title>
+<meta name="description" content="FlatFinder helps renters find better homes without gatekeeping. Join the waitlist and contact Benny for early access.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#1a1a1e">
+<meta property="og:title" content="FlatFinder™: Housing Revolutionised">
+<meta property="og:description" content="Join the FlatFinder waitlist and get first access to Benny, your anti-gatekeeping housing agent.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://flatfinder.io/flatfinder-landing.html">
+<meta property="og:image" content="https://flatfinder.io/Benny!.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FlatFinder™: Housing Revolutionised">
+<meta name="twitter:description" content="Join the FlatFinder waitlist and get first access to Benny.">
+<meta name="twitter:image" content="https://flatfinder.io/Benny!.png">
+<link rel="icon" type="image/png" href="/Benny!.png">
+<link rel="apple-touch-icon" href="/Benny!.png">
+<link rel="canonical" href="https://flatfinder.io/flatfinder-landing.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -629,7 +644,7 @@
   <ul class="nav-links">
     <li><a href="#how">How It Works</a></li>
     <li><a href="#manifesto">Why FlatFinder</a></li>
-    <li><a href="mailto:flat@flatfinder.io">Contact Benny</a></li>
+    <li><a href="mailto:flat@flatfinder.io" data-contact-benny="true">Contact Benny</a></li>
   </ul>
 </nav>
 
@@ -652,7 +667,7 @@
     </p>
     <div class="btn-group">
       <button class="btn-primary" onclick="openModal()" type="button">Get Early Access →</button>
-      <a href="mailto:flat@flatfinder.io" class="btn-secondary">✉ Contact Benny</a>
+      <a href="mailto:flat@flatfinder.io" class="btn-secondary" data-contact-benny="true">✉ Contact Benny</a>
     </div>
   </div>
 
@@ -729,7 +744,7 @@
   <p>Join the waitlist. Be first when Benny opens his doors.</p>
   <div class="btn-group">
     <button class="btn-primary" onclick="openModal()" type="button">Get Early Access →</button>
-    <a href="mailto:flat@flatfinder.io" class="btn-secondary">✉ flat@flatfinder.io</a>
+    <a href="mailto:flat@flatfinder.io" class="btn-secondary" data-contact-benny="true">✉ flat@flatfinder.io</a>
   </div>
 </section>
 
@@ -740,12 +755,13 @@
     <li><a href="#">Terms</a></li>
     <li><a href="#">Privacy</a></li>
     <li><a href="#">Cookies</a></li>
-    <li><a href="mailto:flat@flatfinder.io">Contact</a></li>
+    <li><a href="mailto:flat@flatfinder.io" data-contact-benny="true">Contact</a></li>
   </ul>
   <div class="footer-legal">
-    © 2025–2026 Lila Olufemi Inglis Abegunrin / FlatFinder: Housing Revolutionised Inc.<br>
-    All Rights Reserved. Patent Pending. Benny™ is a registered character of FlatFinder: Housing Revolutionised Inc.<br>
-    Federally Incorporated — Canada · First Created: On or about May 8–20, 2025
+    <div style="font-family: sans-serif; font-size: 12px; color: #7a7670; line-height: 1.6; border-top: 1px solid #7a7670; padding-top: 20px; margin-top: 40px;">
+      <p>Based on true events. Sadly.</p>
+      <p>© 2024–2026 Lila Olufemi Inglis Abegunrin · FlatFinder: Housing Revolutionised™ Inc. · Trademarks and Patents Pending (CIPO) · <strong>REVOLUTIONISING LIFE SINCE 1982™</strong></p>
+    </div>
   </div>
 </footer>
 
@@ -832,6 +848,25 @@
 function openModal(){document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden'}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';document.getElementById('formView').style.display='block';document.getElementById('successView').style.display='none'}
 function toggleCityOther(s){document.getElementById('cityOtherWrap').style.display=s.value==='other'?'flex':'none'}
+function openContactBennyEmail(e){
+  if(e)e.preventDefault();
+  const to='flat@flatfinder.io';
+  const subject='FlatFinder Inquiry';
+  const body='Hi Benny,%0D%0A%0D%0AI need help finding a place.%0D%0A%0D%0AThanks!';
+  const mailto=`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
+  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(isMobile){
+    window.location.href=mailto;
+    return;
+  }
+  const popup=window.open(mailto,'contact-benny-mail','width=480,height=640');
+  if(!popup){
+    window.location.href=mailto;
+  }
+}
+document.querySelectorAll('[data-contact-benny="true"]').forEach(function(link){
+  link.addEventListener('click',openContactBennyEmail);
+});
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
 document.getElementById('waitlistForm').addEventListener('submit',async function(e){
